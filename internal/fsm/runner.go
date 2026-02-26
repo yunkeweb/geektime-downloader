@@ -80,7 +80,7 @@ func (r *FSMRunner) Run() error {
 			var index int
 			index, err = ui.ArticleSelect(r.selectedProduct.Articles)
 			if err == nil {
-				err = r.handleSelectArticle(index)
+				err = r.handleSelectArticle(index, r.selectedProductType, r.selectedProduct)
 			}
 		}
 
@@ -124,7 +124,7 @@ func (r *FSMRunner) handleInputProductIDIfNeedSelectArticle(productID int) error
 		if r.selectedProductType.IsUniversity() {
 			// university don't need check product type
 			// if input invalid id, access mark is 0
-			course, err = r.geektimeClient.UniversityCourseInfo(productID)
+			course, err = r.geektimeClient.UniversityClassInfo(productID)
 			if err != nil {
 				return err
 			}
@@ -191,12 +191,27 @@ func (r *FSMRunner) validateProductCode(productCode string) bool {
 	return false
 }
 
-func (r *FSMRunner) handleSelectArticle(index int) error {
+func (r *FSMRunner) handleSelectArticle(index int, selectedProductType ui.ProductTypeSelectOption, selectedProduct geektime.Course) error {
 	if index == 0 {
 		r.currentState = StateProductAction
 		return nil
 	}
 	a := r.selectedProduct.Articles[index-1]
+
+	// 训练营特殊处理，训练营只能从文章详情中获取当前文章是否是视频，训练营目前只支持下载视频类文章，
+	// 选择文章下载时，如果是文本类，提示用户重新选择
+	if selectedProductType.IsUniversity() {
+		universityArticleDetail, err := r.geektimeClient.UniversityClassArticleDetail(selectedProduct.ID, a.AID)
+		if err != nil {
+			return err
+		}
+		if universityArticleDetail.Data.VideoID == "" {
+			fmt.Printf("\r训练营暂时只支持下载视频，请重新选择")
+			time.Sleep(time.Second)
+			r.currentState = StateSelectArticle
+			return nil
+		}
+	}
 
 	err := r.courseDownloader.DownloadArticle(r.selectedProduct, r.selectedProductType, a, true)
 	if err != nil {

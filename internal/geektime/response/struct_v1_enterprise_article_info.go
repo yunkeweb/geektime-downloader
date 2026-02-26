@@ -15,7 +15,7 @@ type V1EnterpriseArticlesDetailResponse struct {
 		PID              int    `json:"pid"`
 		SKU              int    `json:"sku"`
 		Action           string `json:"action"`
-		Score            int    `json:"score"`
+		Score            int64  `json:"score"`
 		IsRequired       bool   `json:"is_required"`
 		URI              string `json:"uri"`
 		ColumnType       int    `json:"column_type"`

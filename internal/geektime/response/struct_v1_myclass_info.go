@@ -8,18 +8,18 @@ type V1MyClassInfoResponse struct {
 		Title     string `json:"title"`
 		Lessons   []struct {
 			ChapterName string `json:"chapter_name"`
-			BeginTime   int    `json:"begin_time"`
-			ChapterID   int    `json:"chapter_id"`
-			IndexNo     int    `json:"index_no"`
+			// BeginTime   int    `json:"begin_time"`
+			// ChapterID   int    `json:"chapter_id"`
+			// IndexNo     int    `json:"index_no"`
 			Articles    []struct {
 				ArticleID    int    `json:"article_id"`
 				ArticleTitle string `json:"article_title"`
-				IndexNo      int    `json:"index_no"`
-				IsRead       bool   `json:"is_read"`
-				IsFinish     bool   `json:"is_finish"`
+				// IndexNo      int    `json:"index_no"`
+				// IsRead       bool   `json:"is_read"`
+				// IsFinish     bool   `json:"is_finish"`
 				// HasNotes         bool          `json:"has_notes"`
 				// IsRequired       int           `json:"is_required"`
-				VideoTime int `json:"video_time"`
+				// VideoTime int64 `json:"video_time"`
 				// LearnTime        int           `json:"learn_time"`
 				// LearnStatus      int           `json:"learn_status"`
 				// MaxOffset        int           `json:"max_offset"`
