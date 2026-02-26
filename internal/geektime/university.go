@@ -2,6 +2,7 @@ package geektime
 
 import (
 	"github.com/go-resty/resty/v2"
+
 	"github.com/nicoxiang/geektime-downloader/internal/geektime/response"
 )
 
@@ -11,12 +12,14 @@ const (
 
 	// UniversityV1VideoPlayAuthPath used in university video play auth
 	UniversityV1VideoPlayAuthPath = "/serv/v1/video/play-auth"
-	// UniversityV1MyClassInfoPath get university class info and all articles info in it
+	// UniversityV1MyClassInfoPath get university class info and all articles simple info in it
 	UniversityV1MyClassInfoPath = "/serv/v1/myclass/info"
+	// UniversityV1MyClassArticlePath get university class article detail in it
+	UniversityV1MyClassArticlePath = "/serv/v1/myclass/article"
 )
 
-// UniversityCourseInfo get university class info
-func (c *Client) UniversityCourseInfo(classID int) (Course, error) {
+// UniversityClassInfo get university class info
+func (c *Client) UniversityClassInfo(classID int) (Course, error) {
 	var p Course
 
 	var res response.V1MyClassInfoResponse
@@ -49,23 +52,40 @@ func (c *Client) UniversityCourseInfo(classID int) (Course, error) {
 		ID:      classID,
 		Title:   res.Data.Title,
 		Type:    "",
-		IsVideo: true,
+		IsVideo: true,	//训练营目前默认只支持下载视频类课程
 	}
 	var articles []Article
 	for _, lesson := range res.Data.Lessons {
 		for _, article := range lesson.Articles {
-			// ONLY download university video lessons
-			if article.VideoTime > 0 {
-				articles = append(articles, Article{
-					AID:   article.ArticleID,
-					Title: article.ArticleTitle,
-				})
-			}
+			articles = append(articles, Article{
+				AID:   article.ArticleID,
+				Title: article.ArticleTitle,
+			})
 		}
 	}
 	p.Articles = articles
 
 	return p, nil
+}
+
+// UniversityClassArticleDetail get university class article detail
+func (c *Client) UniversityClassArticleDetail(classID, articleID int) (response.V1MyClassArticleResponse, error) {
+	var res response.V1MyClassArticleResponse
+	r := c.newRequest(
+		resty.MethodPost,
+		GeekBangUniversityBaseURL,
+		UniversityV1MyClassArticlePath,
+		nil,
+		map[string]interface{}{
+			"article_id": articleID,
+			"class_id": classID,
+		},
+		&res,
+	)
+
+	_, err := do(r)
+
+	return res, err
 }
 
 // UniversityVideoPlayAuth get university play auth string

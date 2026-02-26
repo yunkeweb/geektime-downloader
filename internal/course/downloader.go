@@ -83,6 +83,17 @@ func (d *CourseDownloader) DownloadAll(course geektime.Course, productType ui.Pr
 	} else {
 		for _, article := range course.Articles {
 			skip := d.skipDownloadVideoArticle(article, columnDir, false)
+			// 训练营特殊处理，训练营只能从文章详情中获取当前文章是否是视频，训练营目前只支持下载视频类文章，
+			// 下载所有时如果是文本类，直接跳过
+			if productType.IsUniversity() {
+				universityArticleDetail, err := d.geektimeClient.UniversityClassArticleDetail(course.ID, article.AID)
+				if err != nil {
+					return err
+				}
+				if universityArticleDetail.Data.VideoID == "" {
+					skip = true
+				}
+			}
 			if !skip {
 				if err := d.downloadVideoArticle(course, productType, article, columnDir); err != nil {
 					return err
